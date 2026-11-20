@@ -1,0 +1,45 @@
+import re
+
+def analyze_email(email_text):
+    risk_score = 0
+    flags = []
+    text_lower = email_text.lower()
+
+    urgent_words = ["urgent", "immediately", "suspended", "verify now", "act fast", "account locked", "24 hours"]
+    if any(word in text_lower for word in urgent_words):
+        risk_score += 1
+        flags.append("Urgent or threatening language detected.")
+
+    sensitive_words = ["password", "otp", "credit card", "bank account", "ssn", "pin", "login credentials"]
+    if any(word in text_lower for word in sensitive_words):
+        risk_score += 1
+        flags.append("Request for sensitive personal or financial information.")
+
+    urls = re.findall(r'https?://[^\s]+', email_text)
+    if urls:
+        for url in urls:
+            if url.startswith("http://") or "bit.ly" in url or "tinyurl" in url:
+                risk_score += 1
+                flags.append(f"Suspicious or unencrypted link detected: {url}")
+                break
+
+    scam_words = ["winner", "lottery", "free gift", "claim your prize", "congratulations"]
+    if any(word in text_lower for word in scam_words):
+        risk_score += 1
+        flags.append("Suspicious reward or lottery claim detected.")
+
+    if risk_score >= 3:
+        print("\nRisk Level: HIGH RISK (Phishing/Unsafe Email)")
+    elif risk_score >= 1:
+        print("\nRisk Level: MEDIUM RISK (Be Cautious)")
+    else:
+        print("\nRisk Level: LOW RISK (Looks Safe)")
+
+    if flags:
+        print("\nDetected Red Flags:")
+        for flag in flags:
+            print("- " + flag)
+
+print("Paste the email content below to analyze:")
+sample_email = input()
+analyze_email(sample_email)
